@@ -65,7 +65,7 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 
 	function getUidFromLoginname($uid) {
-		$this->$logger->info("getUidFromLoginname: " . $uid . "\nResult: " . $this->getLoginNames());
+		$this->logger->info("getUidFromLoginname: " . $uid . "\nResult: " . $this->getLoginNames());
 		$uidMap = $this->getLoginNames();
 		foreach ($uidMap as $key => $value) {
 			if ($value === $uid) {
