@@ -320,7 +320,7 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 		if ($user !== null) {
 			$currentEmailAddress = (string)$user->getEMailAddress();
-			if ($newEmailAddress !== null
+			if ($newEmailAddress != null
 				&& $currentEmailAddress !== $newEmailAddress) {
 				$user->setEMailAddress($newEmailAddress);
 			}
