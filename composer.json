@@ -7,6 +7,10 @@
 		{
 			"name": "Alexey Abel",
 			"email": "dev@abelonline.de"
+		},
+		{
+			"name": "Phillip Kühne",
+			"email": "dev@phillipkuehne.de"
 		}
 	],
 	"homepage": "https://github.com/PanCakeConnaisseur/user_backend_sql_raw",
