@@ -62,6 +62,18 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 			) & $actions);
 	}
 
+
+
+	function getUidFromLoginname($uid) {
+		$uidMap = $this->getLoginNames();
+		foreach ($uidMap as $key => $value) {
+			if ($value === $uid) {
+				return $key;
+			}
+		} 
+		return null;
+	}
+
 	/**
 	 * Checks provided login name and password against the database. This method
 	 * is not part of \OCP\UserInterface but is called by Manager.php of
@@ -77,17 +89,25 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 		}
 
 		$dbHandle = $this->db->getDbHandle();
-
+		
 		$statement = $dbHandle->prepare($this->config->getQueryGetPasswordHashForUser());
 		$statement->execute(['username' => $providedUsername]);
 		$retrievedPasswordHash = $statement->fetchColumn();
-
+		
 		if ($retrievedPasswordHash === FALSE) {
 			return FALSE;
+			$statement = $dbHandle->prepare($this->config->getQueryGetPasswordHashForUser());
+			$statement->execute(['username' => $providedUsername]);
+			$retrievedPasswordHash = $statement->fetchColumn();
+			if ($retrievedPasswordHash === FALSE) {
+				return FALSE;
+			}
 		}
-
-		if (password_verify($providedPassword, $retrievedPasswordHash)) {
-			return $providedUsername;
+		
+		if (password_verify(strtolower($providedUsername) . $providedPassword, $retrievedPasswordHash)) {
+			$uid = $this->getUidFromDisplayname($providedUsername);
+			$this->logger->info("User: ". $providedUsername . "; Uid: " . $uid);
+			return $uid;
 		} else {
 			return FALSE;
 		}
@@ -153,6 +173,22 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 			$displayNames[$matchedUser] = $this->getDisplayName($matchedUser);
 		}
 		return $displayNames;
+	}
+
+	public function getLoginName($providedUsername) {
+		$statement = $this->db->getDbHandle()->prepare($this->config->getQueryGetLoginName());
+		$statement->execute(['username' => $providedUsername]);
+		$retrievedLoginName = $statement->fetchColumn();
+		return $retrievedLoginName;
+	}
+
+	public function getLoginNames($search = '', $limit = null, $offset = null) {
+		$matchedUsers = $this->getUsers($search, $limit, $offset);
+		$loginNames = array();
+		foreach ($matchedUsers as $matchedUser) {
+			$loginNames[$matchedUser] = $this->getLoginName($matchedUser);
+		}
+		return $loginNames;
 	}
 
 	public function setDisplayName($username, $newDisplayName) {

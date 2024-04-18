@@ -53,6 +53,7 @@ class Config {
 	const CONFIG_KEY_DELETE_USER = 'delete_user';
 	const CONFIG_KEY_GET_DISPLAY_NAME = 'get_display_name';
 	const CONFIG_KEY_SET_DISPLAY_NAME = 'set_display_name';
+	const CONFIG_KEY_GET_LOGIN_NAME = 'get_login_name';
 	const CONFIG_KEY_COUNT_USERS = 'count_users';
 	const CONFIG_KEY_GET_HOME = 'get_home';
 	const CONFIG_KEY_CREATE_USER = 'create_user';
@@ -206,6 +207,10 @@ class Config {
 
 	public function getQuerySetDisplayName() {
 		return $this->getQueryStringOrFalse(self::CONFIG_KEY_SET_DISPLAY_NAME);
+	}
+
+	public function getQueryGetLoginName() {
+		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_DISPLAY_NAME);
 	}
 
 	public function getQueryCountUsers() {
