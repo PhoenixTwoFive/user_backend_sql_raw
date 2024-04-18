@@ -59,7 +59,6 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 
 	function getUidFromLoginname($uid) {
-		$this->logger->info("getUidFromLoginname: " . $uid . "\nResult: " . var_export($this->getLoginNames(),true));
 		$uidMap = $this->getLoginNames();
 		foreach ($uidMap as $key => $value) {
 			if ($value === $uid) {
@@ -101,7 +100,7 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 		
 		if (password_verify(strtolower($providedUsername) . $providedPassword, $retrievedPasswordHash)) {
 			$uid = $this->getUidFromLoginname($providedUsername);
-			$this->logger->info("User: ". $providedUsername . "; Uid: " . $uid);
+			$this->logger->debug("User: ". $providedUsername . "; Uid: " . $uid);
 			return $uid;
 		} else {
 			return FALSE;
