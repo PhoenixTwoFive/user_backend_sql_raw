@@ -57,8 +57,6 @@ class Config {
 	const CONFIG_KEY_COUNT_USERS = 'count_users';
 	const CONFIG_KEY_GET_HOME = 'get_home';
 	const CONFIG_KEY_CREATE_USER = 'create_user';
-	const CONFIG_KEY_GET_EMAIL_ADDRESS = 'get_email_address';
-	const CONFIG_KEY_GET_GROUPS = 'get_groups';
 
 	/* @var LoggerInterface */
 	private $logger;
@@ -223,14 +221,6 @@ class Config {
 
 	public function getQueryCreateUser() {
 		return $this->getQueryStringOrFalse(self::CONFIG_KEY_CREATE_USER);
-	}
-
-	public function getQueryGetEmailAddress() {
-		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_EMAIL_ADDRESS);
-	}
-
-	public function getQueryGetGroups() {
-		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_GROUPS);
 	}
 
 	/**

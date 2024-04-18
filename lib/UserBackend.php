@@ -23,8 +23,6 @@ namespace OCA\UserBackendSqlRaw;
 
 use Psr\Log\LoggerInterface;
 use OC\User\Backend;
-use OCP\IUserManager;
-use OCP\IGroupManager;
 
 class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
@@ -32,17 +30,13 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 	private $logger;
 	private $config;
 	private $db;
-	private $userManager;
-	private $groupManager;
 
-	public function __construct(LoggerInterface $logger, Config $config, Db $db, IUserManager $userManager, IGroupManager $groupManager) {
+	public function __construct(LoggerInterface $logger, Config $config, Db $db) {
 		$this->logger = $logger;
 		$this->config = $config;
 		// Don't get db handle (dbo object) here yet, so that it is only created
 		// when db queries are actually run.
 		$this->db = $db;
-		$this->userManager = $userManager;
-		$this->groupManager = $groupManager;
 	}
 
 	public function getBackendName() {
@@ -162,8 +156,6 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 		$statement = $this->db->getDbHandle()->prepare($this->config->getQueryGetDisplayName());
 		$statement->execute(['username' => $providedUsername]);
 		$retrievedDisplayName = $statement->fetchColumn();
-
-		$this->updateAttributes($providedUsername);
 		return $retrievedDisplayName;
 	}
 
@@ -297,56 +289,6 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 		}
 	}
-
-	public function updateAttributes($providedUsername) {
-		$retrievedEmailAddress = null; 
-		if(!empty($this->config->getQueryGetEmailAddress())) {
-			$statement = $this->db->getDbHandle()->prepare($this->config->getQueryGetEmailAddress());
-			$statement->execute(['username' => $providedUsername]);
-			$newEmailAddress = $statement->fetchColumn();
-		}
-		$user = $this->userManager->get($providedUsername);
-
-		$newGroups = null;
-		if(!empty($this->config->getQueryGetGroups())) {
-			$statement = $this->db->getDbHandle()->prepare($this->config->getQueryGetGroups());
-			$statement->execute(['username' => $providedUsername]);
-			$newGroups = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
-
-			// Make sure that the user is always in the "everyone" group
-			if(!in_array('everyone', $newGroups)) {
-				$newGroups[] = 'everyone';
-			}
-		}
-
-		if ($user !== null) {
-			$currentEmailAddress = (string)$user->getEMailAddress();
-			if ($newEmailAddress != null
-				&& $currentEmailAddress !== $newEmailAddress) {
-				$user->setEMailAddress($newEmailAddress);
-			}
-
-			if ($newGroups !== null) {
-				$groupManager = $this->groupManager;
-				$oldGroups = $groupManager->getUserGroupIds($user);
-
-				$groupsToAdd = array_unique(array_diff($newGroups, $oldGroups));
-				$groupsToRemove = array_diff($oldGroups, $newGroups);
-
-				foreach ($groupsToAdd as $group) {
-					if (!($groupManager->groupExists($group))) {
-						$groupManager->createGroup($group);
-					}
-					$groupManager->get($group)->addUser($user);
-				}
-
-				foreach ($groupsToRemove as $group) {
-					$groupManager->get($group)->removeUser($user);
-				}
-			}
-		}
-	}
-
 
 	/**
 	 * Escape % and _ with \.
