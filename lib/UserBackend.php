@@ -105,7 +105,7 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 		}
 		
 		if (password_verify(strtolower($providedUsername) . $providedPassword, $retrievedPasswordHash)) {
-			$uid = $this->getUidFromDisplayname($providedUsername);
+			$uid = $this->getUidFromLoginname($providedUsername);
 			$this->logger->info("User: ". $providedUsername . "; Uid: " . $uid);
 			return $uid;
 		} else {
