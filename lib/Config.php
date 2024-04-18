@@ -210,7 +210,7 @@ class Config {
 	}
 
 	public function getQueryGetLoginName() {
-		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_DISPLAY_NAME);
+		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_LOGIN_NAME);
 	}
 
 	public function getQueryCountUsers() {
