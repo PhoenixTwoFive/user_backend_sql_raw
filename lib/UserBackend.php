@@ -58,10 +58,12 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 
 
-	function getUidFromLoginname($uid) {
+	function getUidFromLoginname($loginname) {
+		/* discard case to match MariaDB */
+		$loginname = strtolower($loginname);
 		$uidMap = $this->getLoginNames();
 		foreach ($uidMap as $key => $value) {
-			if ($value === $uid) {
+			if (strtolower($value) === $loginname) {
 				return $key;
 			}
 		} 
