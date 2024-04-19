@@ -47,6 +47,7 @@ class Config {
 
 	const CONFIG_KEY_QUERIES = 'queries';
 	const CONFIG_KEY_GET_PASSWORD_HASH_FOR_USER = 'get_password_hash_for_user';
+	const CONFIG_KEY_GET_PASSWORD_HASH_FOR_UID = 'get_password_hash_for_uid';
 	const CONFIG_KEY_USER_EXISTS = 'user_exists';
 	const CONFIG_KEY_GET_USERS = 'get_users';
 	const CONFIG_KEY_SET_PASSWORD_HASH_FOR_USER = 'set_password_hash_for_user';
@@ -181,6 +182,10 @@ class Config {
 
 	public function getQueryGetPasswordHashForUser() {
 		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_PASSWORD_HASH_FOR_USER);
+	}
+
+	public function getQueryGetPasswordHashForUid() {
+		return $this->getQueryStringOrFalse(self::CONFIG_KEY_GET_PASSWORD_HASH_FOR_UID);
 	}
 
 	public function getQueryUserExists() {

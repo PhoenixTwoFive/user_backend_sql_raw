@@ -87,20 +87,36 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 		$statement = $dbHandle->prepare($this->config->getQueryGetPasswordHashForUser());
 		$statement->execute(['username' => $providedUsername]);
 		$retrievedPasswordHash = $statement->fetchColumn();
+		$smf_membername = "";
 		
 		if ($retrievedPasswordHash === FALSE) {
-			return FALSE;
-			$statement = $dbHandle->prepare($this->config->getQueryGetPasswordHashForUser());
-			$statement->execute(['username' => $providedUsername]);
+			/**
+			 * No password hash found using provided username as membername.
+			 * Try to find password hash using provided username as UID.
+			 * This is relevant for Apples CalDAV and CardDAV clients,
+			 * which use the UID as username.
+			 **/
+			$statement = $dbHandle->prepare($this->config->getQueryGetPasswordHashForUid());
+			$statement->execute(['userid' => $providedUsername]);
 			$retrievedPasswordHash = $statement->fetchColumn();
 			if ($retrievedPasswordHash === FALSE) {
+				/* Fall through, as the user actually does not exist */
 				return FALSE;
+			} else {
+				/* Found password hash Based on UID, now get the membername */
+				$smf_membername = $this->getLoginName($providedUsername);
 			}
+		} else {
+			/**
+			 * Found password hash using provided username as membername.
+			 * Use that directly for salting.
+			 **/
+			$smf_membername = $providedUsername;
 		}
 		
-		if (password_verify(strtolower($providedUsername) . $providedPassword, $retrievedPasswordHash)) {
+		if (password_verify(strtolower($smf_membername) . $providedPassword, $retrievedPasswordHash)) {
 			$uid = $this->getUidFromLoginname($providedUsername);
-			$this->logger->debug("User: ". $providedUsername . "; Uid: " . $uid);
+			$this->logger->debug("Given login: ". $providedUsername . ", SMF Member name: " . $smf_membername . ", UID: " . $uid);
 			return $uid;
 		} else {
 			return FALSE;
@@ -146,14 +162,14 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 	public function userExists($providedUsername) {
 		$statement = $this->db->getDbHandle()->prepare($this->config->getQueryUserExists());
-		$statement->execute(['username' => $providedUsername]);
+		$statement->execute(['userid' => $providedUsername]);
 		$doesUserExist = $statement->fetchColumn();
 		return $doesUserExist;
 	}
 
 	public function getDisplayName($providedUsername) {
 		$statement = $this->db->getDbHandle()->prepare($this->config->getQueryGetDisplayName());
-		$statement->execute(['username' => $providedUsername]);
+		$statement->execute(['userid' => $providedUsername]);
 		$retrievedDisplayName = $statement->fetchColumn();
 		return $retrievedDisplayName;
 	}
@@ -169,7 +185,7 @@ class UserBackend implements \OCP\IUserBackend, \OCP\UserInterface {
 
 	public function getLoginName($providedUsername) {
 		$statement = $this->db->getDbHandle()->prepare($this->config->getQueryGetLoginName());
-		$statement->execute(['username' => $providedUsername]);
+		$statement->execute(['userid' => $providedUsername]);
 		$retrievedLoginName = $statement->fetchColumn();
 		return $retrievedLoginName;
 	}
